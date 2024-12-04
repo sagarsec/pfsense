@@ -1237,6 +1237,7 @@ install_pkg_install_ports() {
 		echo "Failed!"
 		print_error_pfS
 	fi
+ 	pkg_chroot ${STAGE_CHROOT_DIR} install "${PRODUCT_NAME}-default-config"
 	# Make sure required packages are set as non-automatic
 	pkg_chroot ${STAGE_CHROOT_DIR} set -A 0 pkg ${MAIN_PKG} ${custom_package_list}
 	# pkg and MAIN_PKG are vital
