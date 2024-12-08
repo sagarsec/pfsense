@@ -85,13 +85,6 @@ core_pkg_create() {
 
 	local _template_path=${BUILDER_TOOLS}/templates/core_pkg/${_template}
 
-	# Use default pkg repo to obtain ABI and ALTABI
-	local _abi=$(sed -e "s/%%ARCH%%/${TARGET_ARCH}/g" \
-	    ${PKG_REPO_DEFAULT%%.conf}.abi)
-	local _altabi_arch=$(get_altabi_arch ${TARGET_ARCH})
-	local _altabi=$(sed -e "s/%%ARCH%%/${_altabi_arch}/g" \
-	    ${PKG_REPO_DEFAULT%%.conf}.altabi)
-
 	${BUILDER_SCRIPTS}/create_core_pkg.sh \
 		-t "${_template_path}" \
 		-f "${_flavor}" \
@@ -100,8 +93,6 @@ core_pkg_create() {
 		-s "${_findroot}" \
 		-F "${_filter}" \
 		-d "${CORE_PKG_REAL_PATH}/All" \
-		-a "${_abi}" \
-		-A "${_altabi}" \
 		|| print_error_pfS
 }
 
