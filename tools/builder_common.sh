@@ -595,7 +595,7 @@ clone_to_staging_area() {
 	mkdir -p ${STAGE_CHROOT_DIR}${PRODUCT_SHARE_DIR} >/dev/null 2>&1
 
         # Copy signing keys
-	cp -r ${STAGE_CHROOT_DIR}${PRODUCT_SHARE_DIR}/keys ${PRODUCT_SRC}${STAGE_CHROOT_DIR}${PRODUCT_SHARE_DIR}/keys
+	cp -r ${PRODUCT_SRC}${PRODUCT_SHARE_DIR}/keys ${STAGE_CHROOT_DIR}${PRODUCT_SHARE_DIR}/keys
 
 	# Include a sample pkg stable conf to base
 	setup_pkg_repo \
