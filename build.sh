@@ -352,7 +352,7 @@ if [ -z "${_SKIP_REBUILD_PRESTAGE}" ]; then
 	# Build world, kernel and install
 	make_world
 
-	## Build kernels
+	# Build kernels
 	build_all_kernels
 
 	# Install kernel on installer
