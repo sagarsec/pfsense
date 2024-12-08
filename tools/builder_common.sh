@@ -189,7 +189,7 @@ install_default_kernel() {
 
 	# Copy kernel package to chroot, otherwise pkg won't find it to install
 	if ! pkg_chroot_add ${FINAL_CHROOT_DIR} kernel-${KERNEL_NAME}; then
-		echo ">>> ERROR: Error installing kernel package $(get_pkg_name kernel-${KERNEL_NAME}).txz" | tee -a ${LOGFILE}
+		echo ">>> ERROR: Error installing kernel package $(get_pkg_name kernel-${KERNEL_NAME}).pkg" | tee -a ${LOGFILE}
 		print_error_pfS
 	fi
 
@@ -681,24 +681,24 @@ customize_stagearea_for_image() {
 	pkg_chroot ${FINAL_CHROOT_DIR} set -v 1 -y $(get_pkg_name boot)
 	pkg_chroot ${FINAL_CHROOT_DIR} set -v 1 -y $(get_pkg_name base)
 
-	# XXX: Workaround to avoid pkg to complain regarding release
-	#      repo on first boot since packages are installed from
-	#      staging server during build phase
-	if [ -n "${USE_PKG_REPO_STAGING}" ]; then
-		_read_cmd="select value from repodata where key='packagesite'"
-		if [ -n "${_IS_RELEASE}" -o -n "${_IS_RC}" ]; then
-			local _tgt_server="${PKG_REPO_SERVER_RELEASE}"
-		else
-			local _tgt_server="${PKG_REPO_SERVER_DEVEL}"
-		fi
-		for _db in ${FINAL_CHROOT_DIR}/var/db/pkg/repo-*sqlite; do
-			_cur=$(/usr/local/bin/sqlite3 ${_db} "${_read_cmd}")
-			if [ -n "${_cur}" ]; then
-				_new=$(echo "${_cur}" | sed -e "s,^${PKG_REPO_SERVER_STAGING},${_tgt_server},")
-				/usr/local/bin/sqlite3 ${_db} "update repodata set value='${_new}' where key='packagesite'"
-			fi
-		done
-	fi
+	## XXX: Workaround to avoid pkg to complain regarding release
+	##      repo on first boot since packages are installed from
+	##      staging server during build phase
+	#if [ -n "${USE_PKG_REPO_STAGING}" ]; then
+	#	_read_cmd="select value from repodata where key='packagesite'"
+	#	if [ -n "${_IS_RELEASE}" -o -n "${_IS_RC}" ]; then
+	#		local _tgt_server="${PKG_REPO_SERVER_RELEASE}"
+	#	else
+	#		local _tgt_server="${PKG_REPO_SERVER_DEVEL}"
+	#	fi
+	#	for _db in ${FINAL_CHROOT_DIR}/var/db/pkg/repo-*sqlite; do
+	#		_cur=$(/usr/local/bin/sqlite3 ${_db} "${_read_cmd}")
+	#		if [ -n "${_cur}" ]; then
+	#			_new=$(echo "${_cur}" | sed -e "s,^${PKG_REPO_SERVER_STAGING},${_tgt_server},")
+	#			/usr/local/bin/sqlite3 ${_db} "update repodata set value='${_new}' where key='packagesite'"
+	#		fi
+	#	done
+	#fi
 
 	if [ -n "$_image_variant" -a \
 	    -d ${BUILDER_TOOLS}/templates/custom_logos/${_image_variant} ]; then
