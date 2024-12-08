@@ -567,24 +567,6 @@ clone_to_staging_area() {
 	echo ">>> Cloning everything to ${STAGE_CHROOT_DIR} staging area..."
 	LOGFILE=${BUILDER_LOGS}/cloning.${TARGET}.log
 
-	#tar -C ${PRODUCT_SRC} -c -f - . | \
-	#	tar -C ${STAGE_CHROOT_DIR} -x -p -f -
-
-	#mkdir -p ${STAGE_CHROOT_DIR}/etc/mtree
-	#mtree -Pcp ${STAGE_CHROOT_DIR}/var > ${STAGE_CHROOT_DIR}/etc/mtree/var.dist
-	#mtree -Pcp ${STAGE_CHROOT_DIR}/etc > ${STAGE_CHROOT_DIR}/etc/mtree/etc.dist
-	#if [ -d ${STAGE_CHROOT_DIR}/usr/local/etc ]; then
-	#	mtree -Pcp ${STAGE_CHROOT_DIR}/usr/local/etc > ${STAGE_CHROOT_DIR}/etc/mtree/localetc.dist
-	#fi
-
-	### Add buildtime and lastcommit information
-	## This is used for detecting updates.
-	#echo "$BUILTDATESTRING" > $STAGE_CHROOT_DIR/etc/version.buildtime
-	## Record last commit info if it is available.
-	#if [ -f $SCRATCHDIR/build_commit_info.txt ]; then
-	#	cp $SCRATCHDIR/build_commit_info.txt $STAGE_CHROOT_DIR/etc/version.lastcommit
-	#fi
-
 	local _exclude_files="${SCRATCHDIR}/base_exclude_files"
 	sed \
 		-e "s,%%PRODUCT_NAME%%,${PRODUCT_NAME},g" \
@@ -683,25 +665,6 @@ customize_stagearea_for_image() {
 	# Set base/rc pkgs as vital to avoid user end up removing it for any reason
 	pkg_chroot ${FINAL_CHROOT_DIR} set -v 1 -y $(get_pkg_name boot)
 	pkg_chroot ${FINAL_CHROOT_DIR} set -v 1 -y $(get_pkg_name base)
-
-	## XXX: Workaround to avoid pkg to complain regarding release
-	##      repo on first boot since packages are installed from
-	##      staging server during build phase
-	#if [ -n "${USE_PKG_REPO_STAGING}" ]; then
-	#	_read_cmd="select value from repodata where key='packagesite'"
-	#	if [ -n "${_IS_RELEASE}" -o -n "${_IS_RC}" ]; then
-	#		local _tgt_server="${PKG_REPO_SERVER_RELEASE}"
-	#	else
-	#		local _tgt_server="${PKG_REPO_SERVER_DEVEL}"
-	#	fi
-	#	for _db in ${FINAL_CHROOT_DIR}/var/db/pkg/repo-*sqlite; do
-	#		_cur=$(/usr/local/bin/sqlite3 ${_db} "${_read_cmd}")
-	#		if [ -n "${_cur}" ]; then
-	#			_new=$(echo "${_cur}" | sed -e "s,^${PKG_REPO_SERVER_STAGING},${_tgt_server},")
-	#			/usr/local/bin/sqlite3 ${_db} "update repodata set value='${_new}' where key='packagesite'"
-	#		fi
-	#	done
-	#fi
 
 	if [ -n "$_image_variant" -a \
 	    -d ${BUILDER_TOOLS}/templates/custom_logos/${_image_variant} ]; then
