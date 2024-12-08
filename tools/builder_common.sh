@@ -564,26 +564,26 @@ clone_directory_contents() {
 
 clone_to_staging_area() {
 	# Clone everything to the final staging area
-	echo -n ">>> Cloning everything to ${STAGE_CHROOT_DIR} staging area..."
+	echo ">>> Cloning everything to ${STAGE_CHROOT_DIR} staging area..."
 	LOGFILE=${BUILDER_LOGS}/cloning.${TARGET}.log
 
-	tar -C ${PRODUCT_SRC} -c -f - . | \
-		tar -C ${STAGE_CHROOT_DIR} -x -p -f -
+	#tar -C ${PRODUCT_SRC} -c -f - . | \
+	#	tar -C ${STAGE_CHROOT_DIR} -x -p -f -
 
-	mkdir -p ${STAGE_CHROOT_DIR}/etc/mtree
-	mtree -Pcp ${STAGE_CHROOT_DIR}/var > ${STAGE_CHROOT_DIR}/etc/mtree/var.dist
-	mtree -Pcp ${STAGE_CHROOT_DIR}/etc > ${STAGE_CHROOT_DIR}/etc/mtree/etc.dist
-	if [ -d ${STAGE_CHROOT_DIR}/usr/local/etc ]; then
-		mtree -Pcp ${STAGE_CHROOT_DIR}/usr/local/etc > ${STAGE_CHROOT_DIR}/etc/mtree/localetc.dist
-	fi
+	#mkdir -p ${STAGE_CHROOT_DIR}/etc/mtree
+	#mtree -Pcp ${STAGE_CHROOT_DIR}/var > ${STAGE_CHROOT_DIR}/etc/mtree/var.dist
+	#mtree -Pcp ${STAGE_CHROOT_DIR}/etc > ${STAGE_CHROOT_DIR}/etc/mtree/etc.dist
+	#if [ -d ${STAGE_CHROOT_DIR}/usr/local/etc ]; then
+	#	mtree -Pcp ${STAGE_CHROOT_DIR}/usr/local/etc > ${STAGE_CHROOT_DIR}/etc/mtree/localetc.dist
+	#fi
 
-	## Add buildtime and lastcommit information
-	# This is used for detecting updates.
-	echo "$BUILTDATESTRING" > $STAGE_CHROOT_DIR/etc/version.buildtime
-	# Record last commit info if it is available.
-	if [ -f $SCRATCHDIR/build_commit_info.txt ]; then
-		cp $SCRATCHDIR/build_commit_info.txt $STAGE_CHROOT_DIR/etc/version.lastcommit
-	fi
+	### Add buildtime and lastcommit information
+	## This is used for detecting updates.
+	#echo "$BUILTDATESTRING" > $STAGE_CHROOT_DIR/etc/version.buildtime
+	## Record last commit info if it is available.
+	#if [ -f $SCRATCHDIR/build_commit_info.txt ]; then
+	#	cp $SCRATCHDIR/build_commit_info.txt $STAGE_CHROOT_DIR/etc/version.lastcommit
+	#fi
 
 	local _exclude_files="${SCRATCHDIR}/base_exclude_files"
 	sed \
