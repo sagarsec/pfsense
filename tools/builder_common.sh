@@ -202,10 +202,10 @@ install_default_kernel() {
 	fi
 	mkdir -p $FINAL_CHROOT_DIR/pkgs
 	if [ -z "${2}" -o -n "${INSTALL_EXTRA_KERNELS}" ]; then
-		cp ${CORE_PKG_ALL_PATH}/$(get_pkg_name kernel-${KERNEL_NAME}).txz $FINAL_CHROOT_DIR/pkgs
+		cp ${CORE_PKG_ALL_PATH}/$(get_pkg_name kernel-${KERNEL_NAME}).pkg $FINAL_CHROOT_DIR/pkgs
 		if [ -n "${INSTALL_EXTRA_KERNELS}" ]; then
 			for _EXTRA_KERNEL in $INSTALL_EXTRA_KERNELS; do
-				_EXTRA_KERNEL_PATH=${CORE_PKG_ALL_PATH}/$(get_pkg_name kernel-${_EXTRA_KERNEL}).txz
+				_EXTRA_KERNEL_PATH=${CORE_PKG_ALL_PATH}/$(get_pkg_name kernel-${_EXTRA_KERNEL}).pkg
 				if [ -f "${_EXTRA_KERNEL_PATH}" ]; then
 					echo -n ". adding ${_EXTRA_KERNEL_PATH} on image /pkgs folder"
 					cp ${_EXTRA_KERNEL_PATH} $FINAL_CHROOT_DIR/pkgs
@@ -616,33 +616,6 @@ clone_to_staging_area() {
 	core_pkg_create boot "" ${CORE_PKG_VERSION} ${STAGE_CHROOT_DIR} "./boot"
 	core_pkg_create base "" ${CORE_PKG_VERSION} ${STAGE_CHROOT_DIR}
 
-	local DEFAULTCONF=${STAGE_CHROOT_DIR}/conf.default/config.xml
-
-	# Save current WAN and LAN if value
-	local _old_wan_if=$(xml sel -t -v "${XML_ROOTOBJ}/interfaces/wan/if" ${DEFAULTCONF})
-	local _old_lan_if=$(xml sel -t -v "${XML_ROOTOBJ}/interfaces/lan/if" ${DEFAULTCONF})
-
-	# Change default interface names to match vmware driver
-	xml ed -P -L -u "${XML_ROOTOBJ}/interfaces/wan/if" -v "vmx0" ${DEFAULTCONF}
-	xml ed -P -L -u "${XML_ROOTOBJ}/interfaces/lan/if" -v "vmx1" ${DEFAULTCONF}
-
-	# Restore default values to be used by serial package
-	xml ed -P -L -u "${XML_ROOTOBJ}/interfaces/wan/if" -v "${_old_wan_if}" ${DEFAULTCONF}
-	xml ed -P -L -u "${XML_ROOTOBJ}/interfaces/lan/if" -v "${_old_lan_if}" ${DEFAULTCONF}
-
-	# Activate serial console in config.xml
-	xml ed -L -P -d "${XML_ROOTOBJ}/system/enableserial" ${DEFAULTCONF}
-	xml ed -P -s "${XML_ROOTOBJ}/system" -t elem -n "enableserial" \
-		${DEFAULTCONF} > ${DEFAULTCONF}.tmp
-	xml fo -t ${DEFAULTCONF}.tmp > ${DEFAULTCONF}
-	rm -f ${DEFAULTCONF}.tmp
-
-	echo force > ${STAGE_CHROOT_DIR}/cf/conf/enableserial_force
-
-
-	rm -f ${STAGE_CHROOT_DIR}/cf/conf/enableserial_force
-	rm -f ${STAGE_CHROOT_DIR}/cf/conf/config.xml
-
 	# Make sure pkg is present
 	pkg_bootstrap ${STAGE_CHROOT_DIR}
 
@@ -707,15 +680,6 @@ customize_stagearea_for_image() {
 	# Set base/rc pkgs as vital to avoid user end up removing it for any reason
 	pkg_chroot ${FINAL_CHROOT_DIR} set -v 1 -y $(get_pkg_name boot)
 	pkg_chroot ${FINAL_CHROOT_DIR} set -v 1 -y $(get_pkg_name base)
-
-	if [ "${_image_type}" = "iso" -o \
-	     "${_image_type}" = "memstick" -o \
-	     "${_image_type}" = "memstickserial" -o \
-	     "${_image_type}" = "memstickadi" ]; then
-		mkdir -p ${FINAL_CHROOT_DIR}/pkgs
-		cp ${CORE_PKG_ALL_PATH}/*default-config*.txz ${FINAL_CHROOT_DIR}/pkgs
-	fi
-
 
 	# XXX: Workaround to avoid pkg to complain regarding release
 	#      repo on first boot since packages are installed from
