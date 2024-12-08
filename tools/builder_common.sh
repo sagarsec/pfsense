@@ -693,8 +693,10 @@ customize_stagearea_for_image() {
 		fi
 		for _db in ${FINAL_CHROOT_DIR}/var/db/pkg/repo-*sqlite; do
 			_cur=$(/usr/local/bin/sqlite3 ${_db} "${_read_cmd}")
-			_new=$(echo "${_cur}" | sed -e "s,^${PKG_REPO_SERVER_STAGING},${_tgt_server},")
-			/usr/local/bin/sqlite3 ${_db} "update repodata set value='${_new}' where key='packagesite'"
+			if [ -n "${_cur}" ]; then
+				_new=$(echo "${_cur}" | sed -e "s,^${PKG_REPO_SERVER_STAGING},${_tgt_server},")
+				/usr/local/bin/sqlite3 ${_db} "update repodata set value='${_new}' where key='packagesite'"
+			fi
 		done
 	fi
 
