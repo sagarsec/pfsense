@@ -2045,11 +2045,13 @@ EOF
 
 		echo ">>> Poudriere bulk started at `date "+%Y/%m/%d %H:%M:%S"` for ${jail_arch}"
 		if ! poudriere bulk -f ${_bulk} -j ${jail_name} -p ${POUDRIERE_PORTS_NAME}; then
-			echo ">>> ERROR: Something went wrong..."
-			if [ "${AWS}" = 1 ]; then
-				save_pkgs_to_s3
-			fi
-			print_error_pfS
+    		echo ">>> ERROR: One or more ports failed to build. Check logs for details." | tee -a ${LOGFILE}
+   		 # Log failed ports for manual reattempt
+		    poudriere bulk -f ${_bulk} -j ${jail_name} -p ${POUDRIERE_PORTS_NAME} -C
+		else
+		    echo ">>> All ports built successfully for ${jail_name}" | tee -a ${LOGFILE}
+		fi
+
 		fi
 		echo ">>> Poudriere bulk complated at `date "+%Y/%m/%d %H:%M:%S"` for ${jail_arch}"
 
